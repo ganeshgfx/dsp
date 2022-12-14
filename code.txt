@@ -1,0 +1,500 @@
+[[[[[[[[[[[[[[[[[[[Practical : 1]]]]]]]]]]]]]]]]]]]]]]
+Aim : Write the Programs for Thread Programming in JAVA.
+((((((((((method 1))))))))
+Code :
+
+MultiThreadingDemo.java
+public class MultiThreadingDemo extends Thread {
+    public void run() {
+        try {
+            // Displaying the thread that is running
+            System.out.println("Thread : " + Thread.currentThread().getId() + " is running...");
+        } 
+        catch (Exception e) {
+            // Throwing an exception
+            System.out.println(" Exception is caught");
+        }
+    }
+}
+
+MultiThread.java
+public class MultiThread {
+    public static void main(String[] args) {
+        int n = 8; // Number of threads
+        for (int i = 0; i < n; i++) {
+            MultiThreadingDemo object
+                    = new MultiThreadingDemo();
+            object.start();
+        }
+    }
+}
+
+((((((((((method 2))))))))
+
+class Run implements Runnable {
+    public void run() {
+        try {
+            System.out.println("Thread " + Thread.currentThread().getId() + "is running");
+        } catch (Exception e) {
+            System.out.println("Exception is caught");
+        }
+    }
+}
+public class RunnableExample {
+    public static void main(String[] args) {
+        for (int i = 0; i < 5; i++) {
+            Thread object = new Thread(new Run());
+            object.start();
+        }
+    }
+
+}
+
+
+[[[[[[[[[Practical : 2]]]]]]]]]]
+Aim :  Write a Program to implement Concurrent Echo Client Server Application.
+Code :
+
+Client.java
+import java.io.*;
+import java.net.Socket;
+import java.util.Scanner;
+
+public class Client {
+    // driver code
+    public static void main(String[] args) {
+        // establish a connection by providing host and port
+        // number
+        try (Socket socket = new Socket("localhost", 1234)) {
+            // writing to server
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            // reading from server
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            // object of scanner class
+            Scanner sc = new Scanner(System.in);
+            String line = null;
+            while (!"exit".equalsIgnoreCase(line)) {
+                // reading from user
+                System.out.println("Input your message or else type 'exit' to exit");
+                System.out.printf(">");
+                line = sc.nextLine();
+                // sending the user input to server
+                out.println(line);
+                out.flush();
+                // displaying server reply
+                System.out.println("Server replied : " + in.readLine());
+            }
+            // closing the scanner object
+            sc.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+Client1.java
+
+import java.io.*;
+import java.net.Socket;
+import java.util.Scanner;
+
+public class Client1 {
+    // driver code
+    public static void main(String[] args) {
+        // establish a connection by providing host and port
+        // number
+        try (Socket socket = new Socket("localhost", 1234)) {
+            // writing to server
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            //reading from server
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            // object of scanner class
+            Scanner sc = new Scanner(System.in);
+            String line = null;
+            while (!"exit".equalsIgnoreCase(line)) {
+                //reading from user
+                System.out.println("Input your message or else type 'exit' to exit");
+                System.out.printf(">");
+                line = sc.nextLine();
+                //sending the user input to server
+                out.println(line);
+                out.flush();
+                //displaying server reply
+                System.out.println("Server replied : " + in.readLine());
+            }
+            //closing the scanner object
+            sc.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+ClientHandler.java
+
+import java.io.*;
+import java.net.Socket;
+
+public class ClientHandler implements Runnable {
+    private final Socket clientSocket;
+    // Constructor
+    public ClientHandler(Socket socket) {
+        this.clientSocket = socket;
+    }
+    public void run() {
+        PrintWriter out = null;
+        BufferedReader in = null;
+        try {
+            // get the outputstream of client
+            out = new PrintWriter(clientSocket.getOutputStream(), true);
+            // get the inputstream of client
+            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            String line;
+            while ((line = in.readLine()) != null) {
+                // writing the received message from
+                // client
+                System.out.printf(" Sent from the client: %s\n", line);
+                out.println(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (out != null) 
+                    out.close();
+                if (in != null)
+                    in.close();
+                    clientSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
+Server.java
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public class Server {
+    public static void main(String[] args) {
+        ServerSocket server = null;
+        try {
+            // server is listening on port 1234
+            server = new ServerSocket(1234);
+            server.setReuseAddress(true);
+            // running infinite loop for getting
+            // client request
+            while (true) {
+                // socket object to receive incoming client
+                // requests
+                Socket client = server.accept();
+                // Displaying that new client is connected
+                // to server
+                System.out.println("New client connected : " + client.getInetAddress().getHostAddress());
+                // create a new thread object
+                ClientHandler clientSock = new ClientHandler(client);
+                // This thread will handle the client
+                // separately
+                new Thread(clientSock).start();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (server != null) {
+                try {
+                    server.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+
+                }
+            }
+        }
+    }
+}
+
+
+[[[[[[[[[[[[[Practical : 3]]]]]]]]]]]]]]
+Aim :  Write a Programs for Remote Procedure call.
+Code :
+MyInterface.java
+import java.rmi.*;
+public interface MyInterface extends Remote
+{
+ public String countInput(String input)throws RemoteException;   
+}
+RMIServer.java
+import java.rmi.*;
+import java.rmi.server.*;
+public class RMIServer extends UnicastRemoteObject implements MyInterface
+{ 
+    publicRMIServer()throws RemoteException
+    { 
+        System.out.println(&quot;Remote Server is running Now.!!&quot;); 
+    }    
+public static void main(String arg[])
+{ 
+    try{ 
+        RMIServer p=new RMIServer();
+        Naming.rebind(&quot;rmiInterface&quot;,p);
+    }  
+catch(Exception e)
+{ System.out.println(&quot;Exception occurred : &quot;+e.getMessage()); } 
+}
+    @Override
+    public String countInput(String input) throws RemoteException 
+    {
+    System.out.println(&quot;Received your input &quot;+ input+&quot;  at server!!&quot;);
+        String reply;
+        reply=&quot;You have typed &quot;+ input.length() +&quot;  letters!!&quot;;
+        return reply;
+    }
+}
+RMIClient.java
+import java.rmi.*;
+import java.io.*; 
+public class RMIClient
+{   
+    public static void  main(String args[])
+    { 
+        try
+      { BufferedReaderbr=new BufferedReader(new InputStreamReader(System.in)); 
+      MyInterface p=(MyInterface)Naming.lookup(&quot;rmiInterface&quot;);
+        System.out.println(&quot;Type something...&quot;); 
+        String input=br.readLine(); 
+        System.out.println(p.countInput(input)); 
+            }
+        catch(Exception e) { 
+            System.out.println(&quot;Exception occurred : &quot;+e.getMessage());
+        }
+    } 
+ }
+
+
+[[[[[[[[[[[[[[[[[Practical : 4]]]]]]]]]]]]]]
+Aim : Write a Programs for Remote Method Invocation.
+Code :
+Adder.java
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+
+public interface Adder extends Remote {
+    public int add(int x, int y) throws RemoteException;
+    public String printLength(String s) throws RemoteException;
+}
+
+RemoteAdder.java
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+
+public class RemoteAdder extends UnicastRemoteObject implements Adder {
+    RemoteAdder()throws RemoteException{
+        super();
+    }
+    @Override
+    public int add(int x, int y) throws RemoteException {
+        return (x+y);
+    }
+
+    @Override
+    public String printLength(String s) throws RemoteException {
+        return "String length is : "+s.length();
+    }
+}
+
+MyServer.java
+import java.rmi.Naming;
+import java.rmi.registry.LocateRegistry;
+
+public class MyServer {
+    public static void main(String[] args) {
+
+        try {
+            LocateRegistry.createRegistry(2049);
+            Adder stub = new RemoteAdder();
+            Naming.rebind("rmi://localhost:2049/ds",stub);
+        }catch (Exception error){
+            System.out.println(error.getMessage());
+            error.printStackTrace();
+        }
+    }
+}
+
+MyClient.java
+import java.rmi.Naming;
+import java.rmi.registry.LocateRegistry;
+import java.util.Scanner;
+
+public class MyClient {
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+        System.out.print("Input String : ");
+        String s = input.nextLine();
+        System.out.print("Enter first number : ");
+        int a = input.nextInt();
+        System.out.print("Enter second number : ");
+        int b = input.nextInt();
+        try{
+           // LocateRegistry.createRegistry(2089);
+            Adder stub = (Adder) Naming.lookup("rmi://localhost:2049/ds");
+            System.out.println("\nAnswer : "+stub.add(a,b));
+            System.out.println(stub.printLength(s));
+        }catch (Exception error){
+            System.out.println(error.getMessage());
+            error.printStackTrace();
+        }
+    }
+}
+[[[[[[[[[[[[[[[[[[Practical : 7]]]]]]]]]]]]]]]]]]]]
+Aim : Implement web service in java.
+
+Helloworld.java
+import javax.jws.WebMethod;
+import javax.jws.WebService;
+import javax.jws.soap.SOAPBinding;
+import javax.jws.soap.SOAPBinding.Style;
+//Service Endpoint Interface
+@WebService
+@SOAPBinding(style = Style.RPC)
+public interface HelloWorld{
+@WebMethod String getHelloWorldAsString(String name);
+}
+HelloWorldImpl.java
+import javax.jws.WebService;
+//Service Implementation
+@WebService(endpointInterface = "com.javatpoint.HelloWorld")
+public class HelloWorldImpl implements HelloWorld{
+@Override
+public String getHelloWorldAsString(String name) {
+return "Hello World JAX-WS " + name;
+}
+}
+
+Publisher.java
+import javax.xml.ws.Endpoint;
+//Endpoint publisher
+public class HelloWorldPublisher{
+public static void main(String[] args) {
+Endpoint.publish("http://localhost:7779/ws/hello", new HelloWorldImpl());
+}
+}
+
+HelloWorldClient.java 
+import java.net.URL;  
+import javax.xml.namespace.QName;  
+import javax.xml.ws.Service;  
+public class HelloWorldClient{  
+    public static void main(String[] args) throws Exception {  
+    URL url = new URL("http://localhost:7779/ws/hello?wsdl");  
+   
+        //1st argument service URI, refer to wsdl document above  
+    //2nd argument is service name, refer to wsdl document above  
+        QName qname = new QName("http://javatpoint.com/", "HelloWorldImplService");  
+        Service service = Service.create(url, qname);  
+        HelloWorld hello = service.getPort(HelloWorld.class);  
+        System.out.println(hello.getHelloWorldAsString("javatpoint rpc"));  
+     }  
+ }  
+
+Output:
+Hello World JAX-WS javatpointrpc
+
+
+[[[[[[[[[[[[[[[[[[[[[Practical : 8]]]]]]]]]]]]]]]]]]]]]
+Aim : Implement CORBA file.
+
+Code
+FileInderface.idl
+interfaceFileInterface { 
+typedef sequence Data; 
+Data downloadFile(in string fileName);
+ };
+FileServant.java
+import java.io.*; 
+public class FileServant extends _FileInterfaceImplBase { 
+public byte[] downloadFile(String fileName){ 
+File file = new File(fileName); 
+byte buffer[] = new byte[(int)file.length()]; 
+try { 
+BufferedInputStream input = new 
+BufferedInputStream(new FileInputStream(fileName)); 
+input.read(buffer,0,buffer.length); 
+input.close(); 
+} catch(Exception e) { 
+System.out.println("FileServant Error: "+e.getMessage()); 
+e.printStackTrace(); 
+} 
+return(buffer); 
+} }
+FileServer.java
+import java.io.*;
+importorg.omg.CosNaming.*; 
+import
+org.omg.CosNaming.NamingContextPackage.*; 
+import org.omg.CORBA.*; 
+
+public class FileServer { 
+public static void main(String args[]) { 
+try{
+// create and initialize the ORB 
+ORB orb = ORB.init(args, null); 
+// create the servant and register it with the ORB 
+FileServantfileRef = new FileServant(); 
+orb.connect(fileRef); 
+// get the root naming context 
+org.omg.CORBA.ObjectobjRef = 
+orb.resolve_initial_references("NameService"); NamingContext
+ncRef = NamingContextHelper.narrow(objRef); // Bind the object 
+reference in naming 
+NameComponentnc = new NameComponent("FileTransfer", " "); 
+NameComponentpath[] = {nc}; 
+ncRef.rebind(path, fileRef); 
+System.out.println("Server started...."); 
+// Wait for invocations from clients 
+java.lang.Object sync = new java.lang.Object(); 
+synchronized(sync){ 
+sync.wait(); 
+} 
+} catch(Exception e) { 
+System.err.println("ERROR: " + e.getMessage()); 
+e.printStackTrace(System.out); 
+}  } 
+}
+FileClient.java
+import java.io.*; 
+import java.util.*; 
+importorg.omg.CosNaming.*; 
+import org.omg.CORBA.*; 
+
+public class FileClient { 
+public static void main(String argv[]) { 
+try { 
+// create and initialize the ORB 
+ORB orb = ORB.init(argv, null); 
+// get the root naming context 
+org.omg.CORBA.ObjectobjRef = 
+orb.resolve_initial_references("NameService"); NamingContextncRef
+= NamingContextHelper.narrow(objRef); NameComponentnc = new 
+NameComponent("FileTransfer", " "); 
+// Resolve the object reference in naming 
+NameComponentpath[] = {nc}; 
+FileInterfaceOperationsfileRef = 
+FileInterfaceHelper.narrow(ncRef.resolve(path)); 
+if(argv.length< 1) { 
+System.out.println("Usage: java FileClient filename"); 
+} 
+// save the file 
+File file = new File(argv[0]); 
+byte data[] = fileRef.downloadFile(argv[0]); 
+BufferedOutputStream output = new 
+BufferedOutputStream(new FileOutputStream(argv[0])); 
+output.write(data, 0, data.length); 
+output.flush(); 
+output.close(); 
+} catch(Exception e) { 
+System.out.println("FileClient Error: " + e.getMessage()); 
+e.printStackTrace(); 
+} 
+} 
+}
